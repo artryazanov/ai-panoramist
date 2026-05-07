@@ -1,0 +1,9 @@
+google-genai
+python-dotenv
+click
+pillow
+pydantic
+tenacity
+pytest
+pytest-mock
+pytest-cov

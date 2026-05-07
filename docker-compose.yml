@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  panoramist:
+    build: .
+    image: ai-panoramist:latest
+    container_name: ai-panoramist
+    volumes:
+      - ./output:/app/output
+      - ./.env:/app/.env
+      - ./references:/app/references
+    env_file:
+      - .env
+    # Override command to run something specific or leave empty to use CLI
+    command: ["--prompt", "A cinematic 360 view of a futuristic space station interior"]
