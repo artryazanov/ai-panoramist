@@ -23,14 +23,15 @@ class PromptEnhancer:
         Your task is to expand this idea into a highly detailed, immersive prompt suitable for an AI image generator.
         
         CRITICAL RULES:
-        1. You MUST invent a logical zenith (what is straight above the viewer's head, like the sky, a ceiling, or canopy).
-        2. You MUST invent a logical nadir (what is straight below the viewer's feet, like the ground, a chasm, or floor).
+        1. You MUST invent a logical zenith (what is straight above the viewer's head, like the sky, a ceiling, or canopy). The zenith should logically complete the environment for a spherical view.
+        2. You MUST invent a logical nadir (what is straight below the viewer's feet, like the ground, a chasm, or floor). The nadir should logically complete the environment for a spherical view.
         3. You MUST invent a detailed 360-degree horizon at eye level.
-        4. The final `combined_prompt` MUST include the following exact phrases:
+        4. The left and right edges MUST perfectly mirror each other for a seamless horizontal wrap. Any object or structure that extends past the right boundary MUST continue on the left boundary at the exact same vertical position and angle.
+        5. The final `combined_prompt` MUST include the following exact phrases:
            - "true equirectangular projection"
            - "seamless 360-degree VR panorama"
            - "mathematically seamless left and right edges"
-        5. Describe the scene as a single, cohesive environment. Do not use negative prompts or meta-language like "Generate an image of...".
+        6. Describe the scene as a single, cohesive environment. Do not use negative prompts or meta-language like "Generate an image of...".
         
         Return the structured JSON output.
         """
