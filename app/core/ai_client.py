@@ -19,7 +19,7 @@ class GenAIClient:
         self.validator_model_name = Config.VALIDATOR_MODEL_NAME
 
     @retry(wait=wait_exponential(multiplier=1, min=4, max=30), stop=stop_after_attempt(3), reraise=True)
-    def generate_text(self, prompt: str, schema: Optional[Any] = None) -> Any:
+    def generate_text(self, prompt: str, schema: Optional[Any] = None, reference_images: Optional[List[str]] = None) -> Any:
         try:
             config_args = {
                 'safety_settings': [
@@ -33,9 +33,18 @@ class GenAIClient:
                 config_args['response_mime_type'] = 'application/json'
                 config_args['response_schema'] = schema
 
+            contents = [prompt]
+            if reference_images:
+                for ref_path in reference_images:
+                    if os.path.exists(ref_path):
+                        try:
+                            contents.append(Image.open(ref_path))
+                        except Exception as img_e:
+                            logger.warning(f"Could not load ref image {ref_path}: {img_e}")
+
             response = self.client.models.generate_content(
                 model=self.text_model_name,
-                contents=prompt,
+                contents=contents,
                 config=types.GenerateContentConfig(**config_args)
             )
             
@@ -141,7 +150,7 @@ class GenAIClient:
         Evaluate the image against these STRICT rules:
         1. It MUST look like an equirectangular projection (distorted at the top and bottom).
         2. The extreme top edge (zenith) and extreme bottom edge (nadir) MUST NOT have any lines intersecting them. DO NOT fail the image due to lines touching or intersecting the very top or bottom boundaries.
-        3. The left and right edges should appear as if they could seamlessly wrap around to meet each other. DO NOT fail the image due to minor mismatches or slight misalignments between the left and right edges.
+        3. The left and right edges should appear as if they could seamlessly wrap around to meet each other. If an object is cut off on the right edge, its exact continuation MUST appear on the left edge at the same height. DO NOT fail the image due to minor mismatches or slight misalignments between the left and right edges.
         4. It MUST generally align with the user's base prompt: '{user_prompt}'.
         5. It must NOT look like a standard flat photograph or a collage of multiple disparate scenes.
 

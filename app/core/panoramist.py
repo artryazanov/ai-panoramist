@@ -20,7 +20,7 @@ class Panoramist:
         Orchestrates the panorama generation process.
         """
         # 1. Enhance the prompt
-        enhanced_prompt = self.enhancer.enhance(user_prompt)
+        enhanced_prompt = self.enhancer.enhance(user_prompt, reference_images)
 
         max_retries = Config.MAX_RETRIES
         current_attempt = 1

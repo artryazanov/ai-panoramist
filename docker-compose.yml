@@ -6,6 +6,7 @@ services:
     image: ai-panoramist:latest
     container_name: ai-panoramist
     volumes:
+      - ./app:/app/app
       - ./output:/app/output
       - ./.env:/app/.env
       - ./references:/app/references

@@ -1,4 +1,5 @@
 import logging
+from typing import Optional, List
 from app.core.ai_client import GenAIClient
 from app.core.models import EnhancedPrompt
 
@@ -8,7 +9,7 @@ class PromptEnhancer:
     def __init__(self, ai_client: GenAIClient):
         self.ai_client = ai_client
 
-    def enhance(self, user_prompt: str) -> str:
+    def enhance(self, user_prompt: str, reference_images: Optional[List[str]] = None) -> str:
         """
         Takes a simple user prompt and expands it into a detailed equirectangular VR prompt.
         """
@@ -32,13 +33,21 @@ class PromptEnhancer:
            - "seamless 360-degree VR panorama"
            - "mathematically seamless left and right edges"
         6. Describe the scene as a single, cohesive environment. Do not use negative prompts or meta-language like "Generate an image of...".
+        7. If the user's base idea mentions attached reference images, extract their instructions about them and populate the `reference_instructions` field.
         
         Return the structured JSON output.
         """
 
         try:
-            enhanced_data = self.ai_client.generate_text(system_instruction, schema=EnhancedPrompt)
+            enhanced_data = self.ai_client.generate_text(
+                system_instruction, 
+                schema=EnhancedPrompt,
+                reference_images=reference_images
+            )
+            logger.info(f"Enhanced Data Dict: {enhanced_data.dict() if hasattr(enhanced_data, 'dict') else enhanced_data}")
             final_prompt = enhanced_data.combined_prompt
+            if hasattr(enhanced_data, 'reference_instructions') and enhanced_data.reference_instructions:
+                final_prompt += f"\n\n[META-INSTRUCTION FOR IMAGE GENERATOR]: {enhanced_data.reference_instructions}"
             logger.info(f"Enhanced Prompt: {final_prompt}")
             return final_prompt
         except Exception as e:
