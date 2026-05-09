@@ -11,6 +11,7 @@ def test_enhance_success(mocker):
         zenith_description="A glowing starry sky",
         nadir_description="A deep crystal canyon",
         horizon_description="Alien flora glowing in the dark",
+        reference_instructions="",
         combined_prompt="A seamless 360-degree VR panorama, true equirectangular projection, mathematically seamless left and right edges. A glowing starry sky above, alien flora around, deep crystal canyon below."
     )
     mock_ai_client.generate_text.return_value = mock_enhanced
