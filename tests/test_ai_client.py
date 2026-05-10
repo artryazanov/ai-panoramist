@@ -69,8 +69,11 @@ def test_generate_text_with_reference_images(mocker, mock_genai_client, tmp_path
     mock_response.text = "Result with image"
     mock_genai_client.client.models.generate_content.return_value = mock_response
 
-    # include a non-existent path to test exception handling inside loop
-    result = mock_genai_client.generate_text("test prompt", reference_images=[str(img_path), "does_not_exist.jpg"])
+    # include an invalid image to test exception handling inside loop
+    invalid_img_path = tmp_path / "invalid.jpg"
+    invalid_img_path.write_text("not an image")
+    
+    result = mock_genai_client.generate_text("test prompt", reference_images=[str(img_path), str(invalid_img_path)])
     assert result == "Result with image"
     call_args = mock_genai_client.client.models.generate_content.call_args[1]
     assert len(call_args['contents']) == 2 # Prompt + 1 Valid Image
@@ -119,11 +122,22 @@ def test_generate_image_with_reference_images(mocker, mock_genai_client, tmp_pat
     mock_genai_client.client.models.generate_content.return_value = mock_response
 
     out_path = str(tmp_path / "out3.png")
-    result = mock_genai_client.generate_image("test prompt", reference_images=[str(img_path), "does_not_exist.jpg"], output_path=out_path)
+    
+    invalid_img_path = tmp_path / "invalid.jpg"
+    invalid_img_path.write_text("not an image")
+    
+    result = mock_genai_client.generate_image("test prompt", reference_images=[str(img_path), str(invalid_img_path)], output_path=out_path)
     assert result == out_path
     call_args = mock_genai_client.client.models.generate_content.call_args[1]
     # prompt + text reference label + image
     assert len(call_args['contents']) == 3
+
+def test_fix_panorama_seam(mocker, mock_genai_client):
+    mocker.patch.object(mock_genai_client, 'generate_image', return_value="fixed_output.png")
+    result = mock_genai_client.fix_panorama_seam("input.png", "fixed_output.png")
+    assert result == "fixed_output.png"
+    mock_genai_client.generate_image.assert_called_once()
+    assert "artificial black box" in mock_genai_client.generate_image.call_args[1]['prompt']
 
 def test_generate_image_no_images_returned(mocker, mock_genai_client):
     mock_response = mocker.Mock()

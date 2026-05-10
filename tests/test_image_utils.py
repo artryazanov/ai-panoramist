@@ -53,7 +53,66 @@ def test_blend_center_patch(tmp_path):
         # Dead center (x=50) should be pure white
         assert img.getpixel((50, 25))[:3] == (255, 255, 255)
         
-        # The feathered area (e.g., x=32, which is 2 pixels into the 8-pixel feather)
+        # The feathered area (e.g., x=31, which is 1 pixel into the 2-pixel feather)
         # should be a mix of black and white (gray).
-        gray_val = img.getpixel((32, 25))[0]
+        gray_val = img.getpixel((31, 25))[0]
         assert 0 < gray_val < 255
+
+def test_swap_image_halves_jpg(tmp_path, dummy_image):
+    output_path = str(tmp_path / "swapped.jpg")
+    result_path = swap_image_halves(dummy_image, output_path)
+    assert result_path.endswith(".jpg")
+    assert os.path.exists(result_path)
+
+def test_draw_center_black_box_jpg(tmp_path, dummy_image):
+    output_path = str(tmp_path / "black_box.jpg")
+    from app.core.image_utils import draw_center_black_box
+    result_path = draw_center_black_box(dummy_image, output_path)
+    assert result_path.endswith(".jpg")
+    assert os.path.exists(result_path)
+
+def test_blend_center_patch_jpg(tmp_path):
+    orig = Image.new("RGB", (100, 50), color="black")
+    fixed = Image.new("RGB", (100, 50), color="white")
+    orig_path = str(tmp_path / "orig.png")
+    fixed_path = str(tmp_path / "fixed.png")
+    output_path = str(tmp_path / "blended.jpg")
+    orig.save(orig_path)
+    fixed.save(fixed_path)
+    result_path = blend_center_patch(orig_path, fixed_path, output_path, patch_width_ratio=0.4)
+    assert result_path.endswith(".jpg")
+    assert os.path.exists(result_path)
+
+def test_swap_image_halves_exception():
+    with pytest.raises(Exception):
+        swap_image_halves("nonexistent_image.png", "output.png")
+
+def test_draw_center_black_box_exception():
+    from app.core.image_utils import draw_center_black_box
+    with pytest.raises(Exception):
+        draw_center_black_box("nonexistent_image.png", "output.png")
+
+def test_blend_center_patch_exception():
+    with pytest.raises(Exception):
+        blend_center_patch("nonexistent_orig.png", "nonexistent_fixed.png", "output.png")
+
+def test_blend_center_patch_resize(tmp_path):
+    orig = Image.new("RGB", (100, 50), color="black")
+    fixed = Image.new("RGB", (80, 40), color="white") # different size
+    orig_path = str(tmp_path / "orig.png")
+    fixed_path = str(tmp_path / "fixed.png")
+    output_path = str(tmp_path / "blended.png")
+    orig.save(orig_path)
+    fixed.save(fixed_path)
+    blend_center_patch(orig_path, fixed_path, output_path)
+    
+def test_blend_center_patch_odd_width(tmp_path):
+    orig = Image.new("RGB", (100, 50), color="black")
+    fixed = Image.new("RGB", (100, 50), color="white") 
+    orig_path = str(tmp_path / "orig.png")
+    fixed_path = str(tmp_path / "fixed.png")
+    output_path = str(tmp_path / "blended.png")
+    orig.save(orig_path)
+    fixed.save(fixed_path)
+    # 0.33 * 100 = 33 (odd)
+    blend_center_patch(orig_path, fixed_path, output_path, patch_width_ratio=0.33)

@@ -44,7 +44,7 @@ class PromptEnhancer:
                 schema=EnhancedPrompt,
                 reference_images=reference_images
             )
-            logger.info(f"Enhanced Data Dict: {enhanced_data.dict() if hasattr(enhanced_data, 'dict') else enhanced_data}")
+            logger.info(f"Enhanced Data Dict: {enhanced_data.model_dump() if hasattr(enhanced_data, 'model_dump') else enhanced_data}")
             final_prompt = enhanced_data.combined_prompt
             if hasattr(enhanced_data, 'reference_instructions') and enhanced_data.reference_instructions:
                 final_prompt += f" {enhanced_data.reference_instructions}"
