@@ -174,6 +174,7 @@ class GenAIClient:
         3. The left and right edges should appear as if they could seamlessly wrap around to meet each other. If an object is cut off on the right edge, its exact continuation MUST appear on the left edge at the same height. DO NOT fail the image due to minor mismatches or slight misalignments between the left and right edges.
         4. It MUST generally align with the user's base prompt: '{user_prompt}'.
         5. It must NOT look like a standard flat photograph or a collage of multiple disparate scenes.
+        6. DO NOT evaluate, check, or fail the image based on its aspect ratio. The aspect ratio is explicitly controlled by the system and may not be 2:1.
 
         Return the validation JSON. If it fails, explain EXACTLY what is wrong (e.g. "object intersecting top edge", "left and right edges do not match") so the generator can fix it in the next attempt.
         """
