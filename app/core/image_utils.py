@@ -57,7 +57,7 @@ def swap_image_halves(image_path: str, output_path: str) -> str:
         logger.error(f"Failed to swap image halves: {e}")
         raise
 
-def blend_center_patch(original_path: str, fixed_path: str, output_path: str, patch_width_ratio: float = 0.3) -> str:
+def blend_center_patch(original_path: str, fixed_path: str, output_path: str, patch_width_ratio: float = 0.3, feather_ratio: float = 0.05) -> str:
     """
     Extracts a center patch from the fixed image and overlays it on the original image 
     with feathered (alpha-blended) edges to ensure a seamless transition.
@@ -88,8 +88,8 @@ def blend_center_patch(original_path: str, fixed_path: str, output_path: str, pa
             # Create an alpha mask for the patch
             mask = Image.new("L", (patch_width, height), color=255)
             
-            # Define feathering width (e.g., 20% of the patch width on each side)
-            feather_width = int(patch_width * 0.2)
+            # Define feathering width, controlled by feather_ratio to keep the blend near the edges
+            feather_width = int(patch_width * feather_ratio)
 
             # Create gradient edges using numpy for performance
             # We want a 1D gradient array that we repeat across height

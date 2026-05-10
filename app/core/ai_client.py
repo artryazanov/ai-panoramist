@@ -149,10 +149,10 @@ class GenAIClient:
         """
         prompt = (
             "This is a 360-degree panorama. There is a large artificial black box in the center of the image. "
-            "Please regenerate the image, completely removing the black box and replacing it with natural scenery "
+            "Please regenerate the image, completely removing the black box and replacing it with appropriate content "
             "that perfectly connects the left and right halves of the image. Create a smooth, continuous transition "
             "in the center that flawlessly matches the surrounding environment. DO NOT change the outer edges; "
-            "keep the left and right sides of the room exactly as they are."
+            "keep the left and right sides of the image exactly as they are."
         )
         logger.info(f"Fixing panorama seam for {image_path}...")
         return self.generate_image(
@@ -170,13 +170,13 @@ class GenAIClient:
         
         Evaluate the image against these STRICT rules:
         1. It MUST look like an equirectangular projection (distorted at the top and bottom).
-        2. The extreme top edge (zenith) and extreme bottom edge (nadir) MUST NOT have any lines intersecting them. DO NOT fail the image due to lines touching or intersecting the very top or bottom boundaries.
-        3. The left and right edges should appear as if they could seamlessly wrap around to meet each other. If an object is cut off on the right edge, its exact continuation MUST appear on the left edge at the same height. DO NOT fail the image due to minor mismatches or slight misalignments between the left and right edges.
+        2. The extreme top edge (zenith) and extreme bottom edge (nadir) MUST NOT have any lines intersecting them. DO NOT fail the image due to lines touching the very top or bottom boundaries.
+        3. The left and right edges should appear as if they could seamlessly wrap around to meet each other.
         4. It MUST generally align with the user's base prompt: '{user_prompt}'.
         5. It must NOT look like a standard flat photograph or a collage of multiple disparate scenes.
         6. DO NOT evaluate, check, or fail the image based on its aspect ratio. The aspect ratio is explicitly controlled by the system and may not be 2:1.
 
-        Return the validation JSON. If it fails, explain EXACTLY what is wrong (e.g. "object intersecting top edge", "left and right edges do not match") so the generator can fix it in the next attempt.
+        Return the validation JSON. If it fails, explain EXACTLY what is wrong (e.g. "object intersecting top edge") so the generator can fix it in the next attempt.
         """
         
         try:

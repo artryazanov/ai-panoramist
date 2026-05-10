@@ -25,7 +25,7 @@ class Panoramist:
 
         max_retries = Config.MAX_RETRIES
         current_attempt = 1
-        qa_feedback = ""
+        accumulated_feedbacks = []
 
         # Safe slug for filename
         slug = "".join(x for x in user_prompt[:20].lower() if x.isalnum() or x == '_')
@@ -39,11 +39,12 @@ class Panoramist:
         while current_attempt <= max_retries:
             logger.info(f"--- Attempt {current_attempt}/{max_retries} ---")
             
-            # Incorporate QA feedback if we have it
+            # Incorporate accumulated QA feedback
             current_prompt = enhanced_prompt
-            if qa_feedback:
-                safe_feedback = self.ai_client.sanitize_prompt_feedback(qa_feedback)
-                current_prompt += f"\n\n[CRITICAL CORRECTIONS]: {safe_feedback}"
+            if accumulated_feedbacks:
+                current_prompt += "\n\n[CRITICAL CORRECTIONS REQUIRED]\nYou previously made errors. You MUST apply ALL of the following corrections:\n"
+                for i, fb in enumerate(accumulated_feedbacks, 1):
+                    current_prompt += f"{i}. {fb}\n"
 
             output_filename = f"{slug}_{timestamp}_v{current_attempt}.png"
             attempt_output_path = str(self.output_dir / output_filename)
@@ -66,7 +67,8 @@ class Panoramist:
                     break
                 else:
                     logger.warning(f"QA Validation Failed: {validation_result.feedback}")
-                    qa_feedback = validation_result.feedback
+                    safe_feedback = self.ai_client.sanitize_prompt_feedback(validation_result.feedback)
+                    accumulated_feedbacks.append(safe_feedback)
                     final_output_path = saved_path # Keep it in case we run out of retries
                     
             except Exception as e:

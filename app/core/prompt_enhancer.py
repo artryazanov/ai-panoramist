@@ -47,7 +47,7 @@ class PromptEnhancer:
             logger.info(f"Enhanced Data Dict: {enhanced_data.dict() if hasattr(enhanced_data, 'dict') else enhanced_data}")
             final_prompt = enhanced_data.combined_prompt
             if hasattr(enhanced_data, 'reference_instructions') and enhanced_data.reference_instructions:
-                final_prompt += f"\n\n[META-INSTRUCTION FOR IMAGE GENERATOR]: {enhanced_data.reference_instructions}"
+                final_prompt += f" {enhanced_data.reference_instructions}"
             logger.info(f"Enhanced Prompt: {final_prompt}")
             return final_prompt
         except Exception as e:
