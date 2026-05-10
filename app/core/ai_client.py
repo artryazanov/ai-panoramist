@@ -13,7 +13,10 @@ logger = logging.getLogger(__name__)
 
 class GenAIClient:
     def __init__(self):
-        self.client = genai.Client(api_key=Config.GEMINI_API_KEY)
+        self.client = genai.Client(
+            api_key=Config.GEMINI_API_KEY,
+            http_options={'timeout': 180000}
+        )
         self.text_model_name = Config.TEXT_MODEL_NAME
         self.image_model_name = Config.IMAGE_MODEL_NAME
         self.validator_model_name = Config.VALIDATOR_MODEL_NAME
@@ -139,6 +142,24 @@ class GenAIClient:
         except Exception as e:
             logger.error(f"Error generating image: {e}")
             raise
+
+    def fix_panorama_seam(self, image_path: str, output_path: str) -> str:
+        """
+        Uses the image generator to heal the vertical seam in the center of the image.
+        """
+        prompt = (
+            "This is a 360-degree panorama. There is a large artificial black box in the center of the image. "
+            "Please regenerate the image, completely removing the black box and replacing it with natural scenery "
+            "that perfectly connects the left and right halves of the image. Create a smooth, continuous transition "
+            "in the center that flawlessly matches the surrounding environment. DO NOT change the outer edges; "
+            "keep the left and right sides of the room exactly as they are."
+        )
+        logger.info(f"Fixing panorama seam for {image_path}...")
+        return self.generate_image(
+            prompt=prompt,
+            reference_images=[image_path],
+            output_path=output_path
+        )
 
     def validate_panorama(self, generated_image_path: str, user_prompt: str) -> ImageValidationResult:
         logger.info(f"Running QA validation on {generated_image_path}...")

@@ -8,6 +8,7 @@ By automatically applying the mathematically correct formatting markers and spat
 
 - **Prompt Enhancement Loop**: Converts simple user prompts (e.g., "A cyberpunk city at night") into rigorous VR-ready prompts containing zenith, nadir, and horizon specifications.
 - **Automated QA Validation**: The built-in LLM QA checks generated images to ensure they look like proper panoramas. If an attempt fails, it feeds the critique back to the generator for a better next attempt.
+- **Seamless Center Blending**: After a successful generation, the tool automatically uses AI and alpha-blending to repair the vertical back seam, ensuring a perfectly seamless 360-degree wrap-around.
 - **Multimodal Reference Support**: Provide local images to guide the generation (style transfer, character inclusion, or base layouts).
 - **Docker Ready**: Easy to deploy and run in an isolated environment using Docker Compose.
 

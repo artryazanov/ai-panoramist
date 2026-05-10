@@ -7,3 +7,4 @@ tenacity
 pytest
 pytest-mock
 pytest-cov
+numpy

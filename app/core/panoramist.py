@@ -6,6 +6,7 @@ import time
 from app.config import Config
 from app.core.ai_client import GenAIClient
 from app.core.prompt_enhancer import PromptEnhancer
+from app.core.image_utils import swap_image_halves, blend_center_patch, draw_center_black_box
 
 logger = logging.getLogger(__name__)
 
@@ -77,5 +78,38 @@ class Panoramist:
 
         if current_attempt > max_retries:
             logger.warning("Max retries reached. Returning the last generated image despite QA failures.")
+
+        # 3. Post-Processing: Seam Fixing
+        if final_output_path:
+            logger.info("Applying post-processing to fix the back seam...")
+            try:
+                # Setup intermediate paths
+                base_name = Path(final_output_path).stem
+                swapped_path = str(self.output_dir / f"{base_name}_swapped.png")
+                ai_fixed_path = str(self.output_dir / f"{base_name}_ai_fixed.png")
+                blended_path = str(self.output_dir / f"{base_name}_blended.png")
+                final_fixed_path = str(self.output_dir / f"{base_name}_final.png")
+
+                # Step 1: Swap halves to move the seam to the center
+                swap_image_halves(final_output_path, swapped_path)
+
+                # Step 2: Draw a black box over the seam to force the AI to inpaint it
+                black_box_path = str(self.output_dir / f"{base_name}_black_box.png")
+                draw_center_black_box(swapped_path, black_box_path, box_width_ratio=0.2)
+
+                # Step 3: Use AI to fix the center seam (inpaint the black box)
+                self.ai_client.fix_panorama_seam(black_box_path, ai_fixed_path)
+
+                # Step 4: Blend the AI-fixed center patch onto the original swapped image
+                blend_center_patch(swapped_path, ai_fixed_path, blended_path, patch_width_ratio=0.3)
+
+                # Step 5: Swap halves back to restore original orientation
+                swap_image_halves(blended_path, final_fixed_path)
+
+                logger.info(f"Seam fixing completed successfully. Final image: {final_fixed_path}")
+                final_output_path = final_fixed_path
+            except Exception as e:
+                logger.error(f"Seam fixing post-processing failed: {e}. Returning original output.")
+                # We return the original final_output_path if post-processing fails
 
         return final_output_path
