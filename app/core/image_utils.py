@@ -57,7 +57,7 @@ def swap_image_halves(image_path: str, output_path: str) -> str:
         logger.error(f"Failed to swap image halves: {e}")
         raise
 
-def blend_center_patch(original_path: str, fixed_path: str, output_path: str, patch_width_ratio: float = 0.3, feather_ratio: float = 0.05) -> str:
+def blend_center_patch(original_path: str, fixed_path: str, output_path: str, patch_width_ratio: float = 0.4, feather_ratio: float = 0.05) -> str:
     """
     Extracts a center patch from the fixed image and overlays it on the original image 
     with feathered (alpha-blended) edges to ensure a seamless transition.

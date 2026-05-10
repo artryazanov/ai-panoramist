@@ -103,7 +103,7 @@ class Panoramist:
                 self.ai_client.fix_panorama_seam(black_box_path, ai_fixed_path)
 
                 # Step 4: Blend the AI-fixed center patch onto the original swapped image
-                blend_center_patch(swapped_path, ai_fixed_path, blended_path, patch_width_ratio=0.3)
+                blend_center_patch(swapped_path, ai_fixed_path, blended_path)
 
                 # Step 5: Swap halves back to restore original orientation
                 swap_image_halves(blended_path, final_fixed_path)
