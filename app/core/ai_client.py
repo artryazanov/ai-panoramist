@@ -7,7 +7,7 @@ from app.config import Config
 import json
 import os
 from tenacity import retry, wait_exponential, stop_after_attempt
-from app.core.models import ImageValidationResult
+from app.core.models import ImageValidationResult, SeamAnalysisResult
 
 logger = logging.getLogger(__name__)
 
@@ -201,3 +201,43 @@ class GenAIClient:
         except Exception as e:
             logger.warning(f"Validation API failed: {e}. Bypassing validation.")
             return ImageValidationResult(is_valid=True, feedback="Validation bypassed due to error.")
+
+    def analyze_center_seam(self, image_path: str) -> SeamAnalysisResult:
+        logger.info(f"Analyzing center seam for {image_path}...")
+        
+        prompt = """
+        You are a Quality Assurance inspector for VR assets.
+        I am providing you with an image that is supposed to be a seamless 360-degree panorama.
+        Look EXACTLY at the vertical center line of this image.
+        
+        Your goal is to detect ONLY severe, glaring stitching errors.
+        Is there a highly obvious, unnatural vertical line or a massive semantic mismatch (like a person cut in half) right in the middle?
+        If there is a severe error, there is a 'seam' that needs fixing.
+        
+        CRITICAL: DO NOT be overly strict. Ignore minor misalignments, slight lighting changes, or small discontinuities in background objects (like silhouettes, windows, or distant textures). If the seam is barely noticeable or only affects minor background details, consider it perfectly seamlessly blended and return that there is NO seam.
+        
+        Return the analysis JSON.
+        """
+        
+        try:
+            contents = [prompt, Image.open(image_path)]
+            
+            result = self.client.models.generate_content(
+                model=self.validator_model_name,
+                contents=contents,
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                    response_schema=SeamAnalysisResult,
+                    temperature=0.0,
+                )
+            )
+            if hasattr(result, 'parsed') and result.parsed:
+                return result.parsed
+                
+            clean_text = result.text.replace("```json", "").replace("```", "").strip()
+            data = json.loads(clean_text)
+            return SeamAnalysisResult(**data)
+            
+        except Exception as e:
+            logger.error(f"Seam analysis API failed: {e}. Assuming seam exists to be safe.")
+            return SeamAnalysisResult(has_seam=True, reasoning="API failure, defaulting to assuming seam exists.")

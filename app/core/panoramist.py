@@ -95,6 +95,16 @@ class Panoramist:
                 # Step 1: Swap halves to move the seam to the center
                 swap_image_halves(final_output_path, swapped_path)
 
+                # Step 1.5: Check if a seam actually exists before trying to fix it
+                logger.info("Analyzing if a central seam exists...")
+                seam_analysis = self.ai_client.analyze_center_seam(swapped_path)
+                
+                if not seam_analysis.has_seam:
+                    logger.info(f"No seam detected! Skipping seam repair. Reasoning: {seam_analysis.reasoning}")
+                    return final_output_path
+                else:
+                    logger.info(f"Seam detected, proceeding with repair. Reasoning: {seam_analysis.reasoning}")
+
                 # Step 2: Draw a black box over the seam to force the AI to inpaint it
                 black_box_path = str(self.output_dir / f"{base_name}_black_box.png")
                 draw_center_black_box(swapped_path, black_box_path, box_width_ratio=0.2)

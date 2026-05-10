@@ -61,6 +61,32 @@ def test_generate_panorama_retry_on_qa_fail(mocker, tmp_path):
     mock_draw.assert_called_once()
     mock_blend.assert_called_once()
 
+def test_generate_panorama_skip_seam_repair(mocker, tmp_path):
+    from app.core.models import SeamAnalysisResult
+    
+    mock_ai_client = mocker.patch('app.core.panoramist.GenAIClient').return_value
+    mock_ai_client.generate_image.return_value = str(tmp_path / "test_image.png")
+    mock_ai_client.validate_panorama.return_value = ImageValidationResult(is_valid=True, feedback="Looks good")
+    mock_ai_client.analyze_center_seam.return_value = SeamAnalysisResult(has_seam=False, reasoning="Perfectly seamless")
+
+    mock_enhancer = mocker.patch('app.core.panoramist.PromptEnhancer').return_value
+    mock_enhancer.enhance.return_value = "Enhanced VR Prompt"
+
+    mock_swap = mocker.patch('app.core.panoramist.swap_image_halves')
+    mock_draw = mocker.patch('app.core.panoramist.draw_center_black_box')
+    mock_blend = mocker.patch('app.core.panoramist.blend_center_patch')
+
+    panoramist = Panoramist(tmp_path)
+    result = panoramist.generate_panorama("test prompt")
+
+    # Should return the original generated path since seam repair is skipped
+    assert result == str(tmp_path / "test_image.png")
+    mock_swap.assert_called_once() # Swapped once to check seam
+    mock_ai_client.fix_panorama_seam.assert_not_called()
+    mock_draw.assert_not_called()
+    mock_blend.assert_not_called()
+
+
 def test_generate_panorama_post_processing_failure(mocker, tmp_path):
     mock_ai_client = mocker.patch('app.core.panoramist.GenAIClient').return_value
     mock_ai_client.generate_image.return_value = str(tmp_path / "test_image.png")

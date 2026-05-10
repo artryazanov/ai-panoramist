@@ -11,3 +11,7 @@ class EnhancedPrompt(BaseModel):
 class ImageValidationResult(BaseModel):
     is_valid: bool = Field(description="True if the image PERFECTLY meets the criteria for a 360-degree equirectangular panorama without obvious stitching errors or non-panoramic layouts.")
     feedback: str = Field(description="If invalid, provide EXTREMELY specific feedback on what is wrong and how the image generator must fix it in the next attempt.")
+
+class SeamAnalysisResult(BaseModel):
+    has_seam: bool = Field(description="True if there is a visible unnatural vertical line, semantic mismatch, or discontinuity in the exact horizontal center of the image. False if the center perfectly seamlessly blends and looks natural.")
+    reasoning: str = Field(description="Brief explanation of why a seam was or wasn't detected.")
