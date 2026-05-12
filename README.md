@@ -7,8 +7,8 @@ By automatically applying the mathematically correct formatting markers and spat
 ## Features
 
 - **Prompt Enhancement Loop**: Converts simple user prompts (e.g., "A cyberpunk city at night") into rigorous VR-ready prompts containing zenith, nadir, and horizon specifications.
-- **Automated QA Validation**: The built-in LLM QA checks generated images to ensure they look like proper panoramas. If an attempt fails, it feeds the critique back to the generator for a better next attempt.
-- **Seamless Center Blending**: After a successful generation, the tool automatically uses AI and alpha-blending to repair the vertical back seam, ensuring a perfectly seamless 360-degree wrap-around.
+- **Automated QA Validation & Refinement**: The built-in LLM QA checks generated images to ensure they look like proper panoramas. If an attempt fails, it feeds the critique back to the generator and uses the rejected image as a base for an **img2img refinement** on the next attempt.
+- **Conditional Seamless Blending**: After a successful generation, the tool analyzes the image for vertical back seams. If a severe seam is detected, it automatically uses AI inpainting and alpha-blending to repair it, ensuring a perfectly seamless 360-degree wrap-around.
 - **Multimodal Reference Support**: Provide local images to guide the generation (style transfer, character inclusion, or base layouts).
 - **Docker Ready**: Easy to deploy and run in an isolated environment using Docker Compose.
 
@@ -87,8 +87,14 @@ The project consists of three main components under `app/core`:
 
 ## Running Tests
 
-Unit tests are written using `pytest` and `pytest-mock`. To run the tests locally:
+Unit tests are written using `pytest` and `pytest-mock`. The project aims for 100% test coverage.
 
+**Using Docker (Recommended):**
+```bash
+docker-compose run --rm --entrypoint "pytest --cov=app tests/" panoramist
+```
+
+**Using Local Python Environment:**
 ```bash
 source venv/bin/activate
 pytest --cov=app tests/

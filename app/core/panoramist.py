@@ -42,7 +42,9 @@ class Panoramist:
             # Incorporate accumulated QA feedback
             current_prompt = enhanced_prompt
             if accumulated_feedbacks:
-                current_prompt += "\n\n[CRITICAL CORRECTIONS REQUIRED]\nYou previously made errors. You MUST apply ALL of the following corrections:\n"
+                current_prompt += "\n\n[CRITICAL CORRECTIONS REQUIRED]\n"
+                current_prompt += "The attached reference image is your previous attempt. It contains errors.\n"
+                current_prompt += "You MUST use the reference image as your base and regenerate it, fixing the following issues while keeping the rest of the image intact:\n"
                 for i, fb in enumerate(accumulated_feedbacks, 1):
                     current_prompt += f"{i}. {fb}\n"
 
@@ -70,6 +72,10 @@ class Panoramist:
                     safe_feedback = self.ai_client.sanitize_prompt_feedback(validation_result.feedback)
                     accumulated_feedbacks.append(safe_feedback)
                     final_output_path = saved_path # Keep it in case we run out of retries
+                    
+                    # Update reference images to the failed image for img2img refinement
+                    logger.info(f"Using {saved_path} as reference image for the next attempt.")
+                    reference_images = [saved_path]
                     
             except Exception as e:
                 logger.error(f"Generation attempt failed: {e}")

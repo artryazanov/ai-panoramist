@@ -186,3 +186,40 @@ def test_validate_panorama_exception_bypass(mocker, mock_genai_client, tmp_path)
     result = mock_genai_client.validate_panorama(str(img_path), "test prompt")
     assert result.is_valid is True
     assert "bypassed" in result.feedback
+
+def test_analyze_center_seam_native_parsing(mocker, mock_genai_client, tmp_path):
+    from app.core.models import SeamAnalysisResult
+    img_path = tmp_path / "test.jpg"
+    Image.new('RGB', (10, 10)).save(img_path)
+
+    mock_response = mocker.Mock()
+    mock_parsed = SeamAnalysisResult(has_seam=False, reasoning="Looks good")
+    mock_response.parsed = mock_parsed
+    mock_genai_client.client.models.generate_content.return_value = mock_response
+
+    result = mock_genai_client.analyze_center_seam(str(img_path))
+    assert result == mock_parsed
+
+def test_analyze_center_seam_fallback_parsing(mocker, mock_genai_client, tmp_path):
+    from app.core.models import SeamAnalysisResult
+    img_path = tmp_path / "test.jpg"
+    Image.new('RGB', (10, 10)).save(img_path)
+
+    mock_response = mocker.Mock()
+    del mock_response.parsed
+    mock_response.text = '```json\n{"has_seam": true, "reasoning": "Visible seam"}\n```'
+    mock_genai_client.client.models.generate_content.return_value = mock_response
+
+    result = mock_genai_client.analyze_center_seam(str(img_path))
+    assert result.has_seam is True
+    assert result.reasoning == "Visible seam"
+
+def test_analyze_center_seam_exception(mocker, mock_genai_client, tmp_path):
+    img_path = tmp_path / "test.jpg"
+    Image.new('RGB', (10, 10)).save(img_path)
+
+    mock_genai_client.client.models.generate_content.side_effect = Exception("API Error")
+
+    result = mock_genai_client.analyze_center_seam(str(img_path))
+    assert result.has_seam is True
+    assert "API failure" in result.reasoning
