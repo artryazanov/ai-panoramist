@@ -12,6 +12,11 @@
 
 By automatically applying the mathematically correct formatting markers and spatial logic (zenith/nadir), this tool helps generate high-quality assets ready for use in VR mapping or 360-degree viewers.
 
+## 🖼️ Examples
+
+![Cyberpunk Example](https://raw.githubusercontent.com/artryazanov/ai-panoramist/main/assets/cyberpunk_example.jpg)
+![Beach Example](https://raw.githubusercontent.com/artryazanov/ai-panoramist/main/assets/beach_example.jpg)
+
 ## ✨ Features
 
 - **Prompt Enhancement Loop**: Converts simple user prompts (e.g., "A cyberpunk city at night") into rigorous VR-ready prompts containing zenith, nadir, and horizon specifications.
