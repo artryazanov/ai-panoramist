@@ -171,12 +171,11 @@ class GenAIClient:
         Evaluate the image against these STRICT rules:
         1. It MUST look like an equirectangular projection (distorted at the top and bottom).
         2. The extreme top edge (zenith) and extreme bottom edge (nadir) MUST NOT have any lines intersecting them. DO NOT fail the image due to lines touching the very top or bottom boundaries.
-        3. The left and right edges should appear as if they could seamlessly wrap around to meet each other.
-        4. It MUST generally align with the user's base prompt: '{user_prompt}'.
-        5. It must NOT look like a standard flat photograph or a collage of multiple disparate scenes.
-        6. DO NOT evaluate, check, or fail the image based on its aspect ratio. The aspect ratio is explicitly controlled by the system and may not be 2:1.
+        3. It MUST generally align with the user's base prompt: '{user_prompt}'.
+        4. It must NOT look like a standard flat photograph or a collage of multiple disparate scenes.
+        5. DO NOT evaluate, check, or fail the image based on its aspect ratio. The aspect ratio is explicitly controlled by the system and may not be 2:1.
 
-        Return the validation JSON. If it fails, explain EXACTLY what is wrong (e.g. "object intersecting top edge") so the generator can fix it in the next attempt.
+        Return the validation JSON. If it fails, explain EXACTLY what is wrong so the generator can fix it in the next attempt.
         """
         
         try:
