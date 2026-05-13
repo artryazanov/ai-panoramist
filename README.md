@@ -17,6 +17,9 @@ By automatically applying the mathematically correct formatting markers and spat
 ![Cyberpunk Example](https://raw.githubusercontent.com/artryazanov/ai-panoramist/main/assets/cyberpunk_example.jpg)
 ![Beach Example](https://raw.githubusercontent.com/artryazanov/ai-panoramist/main/assets/beach_example.jpg)
 
+> [!NOTE]
+> The generated panoramas are not mathematically perfect. They may contain minor distortions or blending artifacts, but the overall visual result is still quite impressive!
+
 ## ✨ Features
 
 - **Prompt Enhancement Loop**: Converts simple user prompts (e.g., "A cyberpunk city at night") into rigorous VR-ready prompts containing zenith, nadir, and horizon specifications.
